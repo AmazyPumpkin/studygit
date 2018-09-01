@@ -1,0 +1,58 @@
+Mybatis动态sql
+<select ..>
+  sql语句1
+  <if test="逻辑表达式" >
+  sql语句2
+  </if>
+</select>
+
+<select ...>
+   SQL语句1
+   <choose>
+      <when test="条件表达式">
+      sql语句2
+      </when>
+      <otherwise>
+       sql语句3
+       </otherwise>
+   </choose>
+</select>
+
+
+<select ...>
+  select 字段 from 表
+  <where>
+    and 动态追加条件
+    and ...
+  </where>
+</select>
+
+<update ...>
+ update table
+ <set>
+     动态追加更新字段
+     字段=xx,
+     字段=xx,加逗号
+
+ </set>
+
+</update>
+
+trim
+
+<!--等价where元素-->
+<trim prefix="where" prefixOverrides="AND|OR">
+
+</trim>
+
+<trim suffix="SET" suffixOverride=",">
+
+</trim>
+
+
+<select ..>
+  select 字段 from 表 where 字段 in  
+  <foreach collection="集合" item="迭代变量" open="(" separator="," close=")">
+  #{迭代变量}
+  </foreach>
+</select>

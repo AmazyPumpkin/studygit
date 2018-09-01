@@ -1,0 +1,55 @@
+单独使用myBatis步骤：
+1、导入相关jar包
+2、配置SqlMapConfig.xml文件
+   配置数据库连接相关属性
+   使用mappers加载sql语句的Mapper映射
+  <mappers>
+	<mapper resource="cn/eguid/sql/CostMapper.xml" />
+	<mapper resource="cn/eguid/sql/EmpMapper.xml"/>
+  </mappers>
+
+3、编写实体类
+
+4、编写mapper.xml
+   sql语句编写
+   namespace名与接口名对应
+
+5、编写对应接口
+
+6、根据SqlSessionFactoryBuilder加载SqlMapBatis.xml文件
+   通过xml配置文件创建SqlSessionFactory，通过SqlSessionFactory获取SqlSession
+通过SqlSession的getMapper方法获取接口对象的实现对象
+通过该实现对象就可以执行sql语句
+
+------------------------------------------------------------
+spring+myBatis整合
+
+1、导入jar包（mybatis包，spring(ioc,aop,dbcp,dao)包，）
+
+2、编写实体类
+
+3、编写这行sql操作的接口
+
+4、配置Mapper.xml配置文件，其中数据库操作的id与接口名对应
+
+5、在applicationContext.xml配置文件中配置mybatis工厂
+<!--数据库连接配置-->
+<bean id="mysql" class="org.apache.commons.dbcp.BasicDataSource">
+	<property name="url" value="jdbc:mysql://127.0.0.1:3306/eguid" />
+	<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+	<property name="username" value="root" />
+	<property name="password" value="eguid" />
+</bean>
+<!-- 配置session工厂 -->
+<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--配置数据库连接参数-->
+	<property name="dataSource" ref="mysql"></property>
+        <!--加载Mapper.xml文件-->
+	<property name="mapperLocations" value="classpath:cn/eguid/sql/*.xml"></property>
+</bean>
+<!-- 配置接口扫描路径 -->
+<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+	<property name="basePackage" value="cn.eguid.dao"></property>
+</bean>
+
+6、用spring的getbean("映射接口名",映射接口名.class)方法直接获取改接口实现

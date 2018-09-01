@@ -1,0 +1,76 @@
+EL
+1.访问Bean属性
+查找顺序PageContext  request session application 
+pageScope requestScope  sessionScope    applicationScope    
+${对象名.属性名}
+${对象名["属性名"]}   可以${对象名[变量值]}
+
+ 
+2.输出简单的计算结果
+算数运算:+-*/%  加号只能求和不能连接字符串
+逻辑运算  && ||  !
+关系运算: > >=  < <= == !=
+empty:判断字符串是否为空  空字符串，空集合，值为NULL，找不到对应值为true
+         ${empty str1} ${empty null}
+            
+3.获取请求参数值
+${param.username}
+${paramValues.city}  等价 requset.getParameterValues("city");  可能获取多个参数
+
+
+JSTL
+引用
+导入jar 
+<%@taglib uri="" prefix=""%>
+uri:jsp标签命名空间
+prefix:命名空间前缀
+		
+<c:if test="" var="" scope="">
+
+</c:if>
+test为true时，执行标签内容
+var 为绑定名
+scope为绑定范围 (page,request,session,application)
+
+
+<c:choose>
+  <c:when test="" ></c:when>
+  ..
+  <c:otherwise> </c:otherwise>
+</c:choose>
+
+<c:forEach var="" items="" >
+...  ....
+</c:forEach>
+items指定要遍历的集合
+var属性:指定一个绑定名称，容器每次从集合中取一个对象，然后绑定到pageContext
+对象上
+
+varStatus属性:指定一个绑定民名称，绑定值有一个容器创建的对象，该对象封装了当前
+的跌代状态
+        index返回下标从0开始
+        count 返回第几次迭代从1开始
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

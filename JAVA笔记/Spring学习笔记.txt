@@ -1,0 +1,483 @@
+pageContext request session application
+
+
+Spring
+Spring是一个开源的轻量级的应用开发框架，Spring提供的IOC和AOP功能可以降低耦合度，便于维护和升级，Spring提供了一站式的解决方案，除了可以利用spring本身能的功能外，还可以自由的选择第三方框架进行整合。
+
+Spring的本质是管理软件中的对象，即创建对象和维护对象之间的关系
+
+一、Spring容器
+
+1、Spring简要
+
+任何的Java类和JavaBean都被当成Bean处理，这些Bean通过容器管理和使用
+Spring容器实现了IOC（控制反转）和AOP（动态代理）机制，简化了Bean对象创建以及实现Bean对象之间的解耦（Spring会自动管理Bean，IOC是Spring的核心功能，这个功能非常强大，涉及Java反射机制，Java属于动态语言）
+Spring容器有BeanFactory（Bean工厂）和ApplicationContext（应用环境）两种类型
+JavaBean：一种规范的Java对象，满足如下三点要求：
+1、实现序列化接口
+2、具有无参构造器
+3、具有getter、setter方法
+
+----------------------------------------------------------------
+
+2：Spring容器实例化（使用Spring，需遵守Spring定义的规则）
+
+//加载工程classpath下的配置文件，并实例化：（ApplicationContext继承自BeanFactory接口）
+ApplicationContext ac=new ClassPathXmlApplicationContext("applicationContext.xml");
+----------------------------------------------------------------
+
+3、Spring容器的使用
+
+BeanFactory和ApplicationContext知识维护Bean定义以及相互依赖关系的高级工厂接口，通过BeanFactory和Application可以访问bean定义
+在配置文件applicatonContext.xml中添加Bean定义
+
+<bean id="标识符（相当于这个类的别名）" class="Bean类型（包名+类名）"/>
+
+定义好后，可以直接通过ApplicationContext实例的getBean()方法获取Bean：ac.getBean("标识符");
+----------------------------------------------------------------
+
+4、Bean的实例化
+Spring容器创建Bean对象的方法有三种
+（1、用构造器实例化（重点，最常用）
+（2、用静态工厂方法实例化（了解）
+（3、用实例工厂方法实例化（了解）
+
+4.1、用构造器实例化：
+
+<bean id="标识符" class="包名.类名"/>
+4.2、用静态工厂方法实例化：
+
+<bean id="标识符" class="包名.类名" factory-method="当前类的静态工厂方法"/>
+4.3、用实例工厂方法实例化：
+
+先要有一个已经定义好的Bean
+<bean id="实例1" class="包名.类名"/>
+
+然后用这个bean的其中一个方法实例化另一个bean
+<bean id="实例2" factory-bean="实例1" factory-method="实例1中的某个方法，返回值是一个实例2"/>
+
+4.4、Bean的命名：
+
+1、Bean的名字：可以用<bean>元素的id或者name属性定义
+2、Bean的别名 ：为定义好的bean，增加一个别名，用<alias>指定
+<alias name="实例1的标识符" alias="指定的新别名"/>
+
+4.5、Bean的作用域（通过 <bean scope="作用域">指定）
+1、singleton:单例模式（默认是单例模式）
+2、prototype：原型（创建多个实例）
+3、request:在HTTP请求中，一个bean对象一个request实例（仅限Web环境中）
+4、session：在一个HTTP session中，一个bean对应一个实例（仅限Web环境）
+5、global Session：在一个全局的HTTP Session(仅在基于portlet的web应用中才有意义，portlet规范定义了去哪聚session的概念)
+
+4.6、Bean的生命周期回调
+1、指定初始化回调方法
+<bean id="该类的标识符" class="包名.类名" init-method="该类的初始化方法">
+2、指定销毁回调方法（仅适用于singleton单例模式）
+<bean id="标识符" class="包名.类名" destroy-method="该类的销毁方法">
+3、为所有容器<bean>指定初始化方法
+<beans default-init-method="初始化方法名">
+<bean id="标识符"class="包名.类名"/>
+</beans>
+4、为所有容器<bean>指定销毁方法
+<beans default-destroy-method="destroy">
+<bean id="标识符"class="包名.类名"/>
+</beans>
+5、Bean延迟实例化（只适用于单例模式的bean，适用于使用频率很低的单例对象）
+在ApplicationContext实现的默认行行为就是在启动时为所有的singleton bean提前惊醒实例化
+如果不想提前实例化，可以再<bean>元素中添加lazy-init="true"属性
+一个延迟初始爱护的bean将在第一次被使用时初始化
+可以再<beans/>元素中为所有bean指定延迟实例化
+
+=================================================================
+二、Spring IOC
+1、IOC简要
+IOC （Inversion of Control）控制反转
+IOC是指程序中对象的获取方式发生发转，由直接new对象，转变为由第三方框架创建，注入（DI），降低了对象之间的耦合度
+Spring容器采用DI方式实现IOC控制，IOC是Spring框架的基础和核心
+
+DI（Dependency Injection）依赖注入
+DI的基本原理就是讲一起工作具有关系的对象，通过构造方法参数或方法参数传入建立关联，容器的工作就是创建bean时注入哪些依赖关系
+
+IOC是一种思想，DI是实现IOC的主要技术途径
+-----------------------------------------------------------------
+
+2、DI主要有两种注入方式：Setter注入，构造器注入
+
+2.1、Setter注入（通过调用‘无参构造器’或‘无参static工厂方法’实例化Bean后调用该Bean的‘setter’方法，就可以实现Setter注入）
+在xml配置文件中，配置注入参数
+<bean id="computer"class="cn.eguid.bean.Computer">
+<porperty name="name" value="lenovo笔记本电脑">
+<porperty name="mainboard" value="华硕主板">
+<porperty name="hdd" value="希捷320G">
+</bean>
+
+2.1.1、<value/>元素注入基本值
+
+<bean id="computer" class="cn.eguid.bean.Computer">
+<property name="name"><value>Lenovo</value></property></bean>
+
+2.1.2、通过value属性注入基本值
+<bean id="computer" class="cn.eguid.bean.Computer">
+<property name="name" value="Lenovo"></property></bean>
+
+2.1.3、注入Bean对象（注入外部Bean,引用方式，方便重用）
+<bean id="computer" class="cn.eguid.bean.Computer">
+<property name="name" value="lenovo"></property></bean>
+
+<bean id="Student" class="cn.eguid.bean.Student">
+<property name="Computer" ref="computer"></property></bean>
+
+2.1.4、注入集合（List，Set，Map，Properties）把集合当做Bean
+（1、List注入
+ <bean id="student" class="cn.eugid.bean.Student">
+ <propertyname="teacher">
+<list>
+<value>王克晶</value>
+<value>范传奇</value>
+<value>李红鹤</value>
+</list>
+</properties>
+ </bean>
+（2、Set注入
+ <bean id="student" class="cn.eugid.bean.Student">
+ <propertyname="teacher">
+ <set>
+ <value>王克晶</value>
+ <value>范传奇</value>
+ <value>李红鹤</value>
+ </set>
+ </list>
+ </properties>
+（3、Map注入
+ <bean id="student" class="cn.eugid.bean.Student">
+ <propertyname="teacher">
+ <map>
+ <entry key="JavaBasic" value="王克晶">
+ <entry key="JavaSE" value="范传奇">
+ <entry key="JavaWebBasic" value="李红鹤">
+ </map>
+ </properties>
+（4、Properties注入
+ <bean id="student" class="cn.eugid.bean.Student">
+ <propertyname="teacher">
+ <props>
+ <prop key="JavaBasic">王克晶</prop>
+ <prop key="JavaSE">范传奇</prop>
+ <porp key="JavaWebBasic">李红鹤</prop>
+ </props>
+ </properties>
+2.1.5、引用注入
+<util:list id="teacher">
+<value>李红鹤</value>
+<value>范传奇</value>
+</util:list>
+
+<util:set id="teacher">
+<value>范传奇</value>
+<value>李红鹤</value>
+</util:set>
+
+<util:map id="teacher">
+<entry key="JavaSE" value="范传奇"/>
+<entry key="JavaWebBasic" value="李红鹤"/>
+</util:map>
+<!--定义一个properties-->
+<util:properties id="teacher">
+<prop key="JavaSE">范传奇</prop>
+<prop key="JavaWebBasic">李红鹤</prop>
+</util:properties>
+
+<!--从properties文件读取参数-->
+<util:properties id="teacher"location="classpath:const.properties">
+
+<!--引用Bean-->
+<bean id="teachers" class="cn.eguid.bean.Teacher">
+<property name="teachername" ref="teacher"></bean>
+
+2.1.6、注入表达式
+
+<bean id="teacherInfo" class="cn.eguid.bean.TeacherInfo">
+<property name="course">#{teacher.JavaSE}</property>
+<property name="teachername">#{teacher.JavaWebBasic}</property>
+</bean>
+2.2构造器注入（及与构造器注入是调用带参数的构造器来实现，容器在bean被实例化时，会根据参数类型执行相应的构造器）
+<bean id="computer"class="cn.eguid.bean.Computer">
+<constructor-arg index="0" value="lennovo笔记本电脑">
+<constructor-arg index="1" value="华硕主板">
+</bean>
+
+2.3、自动装配（不推荐使用）
+可以设置autowire属性定义Bean自动装配
+autowire有5种属性值
+1、no  禁用自动装配，默认值
+2、byName  根据属性名自动转配，此项会检查容器并根据名字查询与属性完全一致的bean，并将其自动装配
+3、byType  如果容器中存在一个与制定属性累心相同的bean，那么将该属性自动装配
+4、constructor  与byType方式类似，只适用于构造器参数
+5、autodetect   通过bean类来决定是使用constuctor还是byType惊醒自动装配，如果是默认的构造器，那么件使用byType方式
+-------------------------------------------------------------
+
+3、基于注解的组件扫描（组件扫描可以代替大量的XML配置）
+
+指定一个包路径，Spring会自动扫描该包及其子包所有组件类，当发现组件类定前有特定的注解标记时，就将该组件纳入到Spring容器。等价于原有XML配置中的<bean>定义功能。
+
+3.1、指定扫描类路径
+使用组件扫描，首先需要在XML配置中指定扫描package路径
+<context:component-scan base-package="cn.eguid.bean"/>
+容器会自动扫描cn.eguid.bean包下及其子包下所有组件，并实例化为bean
+
+***3.2、自动扫描的注解标记
+指定扫描类路径后，并不是将所有组件类都扫描到Spring容器，只有在组件类前面有以下注解标记时，才会扫描到Spring容器
+***@Component       通用注解
+@Named           通用注解
+***@Repository      持久层组件注解
+***@Service         业务层组件注解
+***@Controller      控制层注解
+
+3.3、自动扫描组件的命名
+@Component("student")
+public class Student implements Serializable{}
+
+3.4、指定组件的作用域
+受Spring管理的组件，默认作用域是"singleton"
+可以通过@Scope("prototype")标签指定作用域
+
+
+3.5、指定初始化和销毁回调
+
+***3.6、指定依赖注入
+ ***3.6.1、@Autowired/@Qualifier   可以处理构造器和Setter注入
+                   @Qualifier("bean的id")可以指定一个bean的id进行注入，不指定会进行类型匹配注入
+        @Autowired放在方法（包含构造方法）前，@Qualifier放在方法的参数前面
+
+ 3.6.2、@Inject/@Named                      和@Autowired用法相同，需要额外导包（Java官方注解）
+ ***3.6.3、@Resource                           只能处理Setter注入，不指定bean，会自动进行类型匹配注入
+        @Resource(namebean的id")          指定一个bean进行注入
+3.7、注入spring表达式
+***@value("#eguid.name")   可以放在setter方法和属性前面
+
+===============================================================
+
+三、Spring Web MVC
+
+1、Spring Web MVC简要：
+Spring Web MVC是Spring框架一个非常重要的功能模块，实现了MVC结构，便于简单、快速的开发MVC结构的Web程序，Spring Web MVC提供的API封装了常用的Web开发功能，简化了Web开发过程。
+
+---------------------------------------------------------------
+
+***2、MVC要点：
+M   Model(模型层，业务层) 模型层职责是负责业务逻辑，包含两层：业务数据和业务处理逻辑。比如实体类，DAO，Service都属于模型层
+
+V   View(视图层，交互层)视图层的职责是负责显示界面和用户交互(收集用户信息)，属于视图的组件是不包含业务逻辑和控制逻辑的jsp文件
+
+C  Controller(控制层)控制层是模型层和视图层之间的桥梁，用于流程控制
+
+---------------------------------------------------------------
+
+3、Spring Web MVC 核心组件
+
+***3.1、五大组件：
+（1、DispatcherServlet(控制器，请求入口)
+（2、HandlerMapping(控制器，请求派发)
+（3、Controller(控制器，请求处理流程)
+（4、ModelAndView(模型，封装业务处理结果和视图)
+（5、ViewResolver(视图，视图显示处理器)
+
+***3.2、Spring Web MVC处理流程
+DispatcherServlet接收到浏览器请求--->DispatcherServlet查询HandlerMapping组件中的视图表，查询与请求路径对应的Controller组件--->执行Controller组件，完成业务处理，返回一个视图信息名和结果数据--->DispatcjspherServlet通过调用ViewResolver视图解析器，把获得的信息名与视图后缀合并成为一个完整的视图路径，然后定位到该jsp并传递结果数据，生成响应界面--->DispatcherServlet把响应界面发送给浏览器
+
+---------------------------------------------------------------
+
+4、基于"XML配置"的MVC应用
+4.1、搭建Spring Web MVC环境
+
+（1、创建Web工程，并导入相关的Spring开发环境包
+
+（2、在src下添加Spring的XML配置文件（applicationContext.xml名称可以自己定义）
+
+***（3、在部署工程目录下的WEB-INF文件夹下的web.xml中配置DispatcherServlet前端控制器组件（DispatcherServlet组件在Spring中已经提供，只需要配置即可，配置前端组件的同时，指定applicationContext.xml配置文件）
+DispatcherServlet控制器配置
+<servlet>
+<servlet-name>action</servlet-name>
+<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+
+<init-param>
+<!--这里的初始化参数名是固定的，不能更改或变化-->
+<param-name>contextConfigLocation</param-name>
+<!--填写实际存放applicationContext.xml配置文件的路径的文件名-->
+<param-value>classpath:applicationContext.xml</param-value></init-param>
+<!--在容器初始化同时初始化-->
+<load-on-startup>1</load-on-startup>
+</servlet>
+<servlet-mapping>
+<servlet-name>action</servlet-name>
+<url-pattern>*.do</url-pattern>
+</servlet-mapping>
+
+（4、HandlerMapping组件配置
+在applicationContext.xml文件中配置HanddlerMapping组件
+(这种配置方法很不友好，不支持使用这个方法，后面更加强大的组件注解@RequestMapping("/login.do")会代替此而配置方法)
+<bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+<property name="mappings">
+<props>
+<prop key="/login.do">loginController</prop>
+<prop key="/logout.do">logoutController</prop>
+<prop key="/index.do">indexController</prop>
+</props>
+</property>
+
+（5、Controller组件
+
+Controller主键负责执行具体的业务处理，编写时需要继承Controller接口
+public class loginController implements Controller
+
+（6、ModelAndView组件
+该对象可封装模型数据和视图响应信息，Controller组件约定的方法执行后可以返回一个ModelAndView对象。
+ModelAndView构造器有两种：
+a、ModelAndView(String viewName)
+b、ModelAndView(String viewName,Map map)
+viewName是jsp页面的名字
+model的数据存储到request的attribute中
+
+***（7、ViewResolver组件（除了这个组件无法使用注解代替，上面几种组件都可以通过组件注解替代）
+所有Controller组件都会回一个ModelAndView实例，封装了视图名。
+Spring中的视图以名字为标识，视图解析器ViewResolver通过名字来解析视图。
+Spring提供四种视图解析器：
+a、UrlBasedViewResolver   将视图名直接解析成对应的URL，不需要显式的映射定义。如果你的视图名和视图资源的名字是一致的，就可使用该解析器，而无需进行映射
+b、InternalResourceViewResolver  UrlBasedViewResolver的子类，它支持InternalResourceView（对Servlet和JSP的包装），以及其子类jstlView和TilesView响应类型
+c、XmlViewResolver   支持用xml文件定义具体的响应视图文件
+d、VelocityViewResolver/FreeMarkerViewResolver     UrlBasedViewResolver的子类，他能支持Velocity和FreeeMarker等视图技术
+
+InternalResourceViewResolver使用示例：
+<bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+<property name="prefix" value="/WEB-INF/"></property>
+<property name="suffix"value=".jsp"></property>
+</bean>
+如：将视图名login映射到/WEB-INF/hello.jsp
+
+-------------------------------------------------------------
+
+5、基于注解配置的MVC应用
+（1、Controller注解
+
+***推荐使用@Controller注解声明Controller组件，可以不要实现Ctroller接口，使得Controller更加灵活，请求处理的方法也可以灵活定义
+
+@Controller
+public class loginController{}
+
+要让Controller注解生效，必须要在applicationContext.xml配置文件中配置开启组件扫描，并，并指定Controller组件所在包
+例如：<context:component-scan base-package="cn.eguid.controller"/>
+）
+（2、RequestMapping注解
+@RequestMapping注解可以用在类定义和方法定义上
+作用：标明这个类或者方法与哪一个客户请求对应
+例如：
+@Controller
+@RequestMapping("/login")
+public class loginController{
+@RequestMapping("/login.do")
+public String login(){
+return"login/login";
+}}
+
+***spring3.1版本之前
+开启@RequestMapping注解映射，需要在Spring的XML配置文件中定义RequestMappingHandlerMapping(类定义前)和RequestMappingHandlerAdapter(方法定义前)两个bean组件
+<RequestMappingHandlerMapping和RequestMappingHandlerAdapter两个bean组件示例：
+<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"/>
+<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"/>
+***spring3.2版本开始支持简化定义
+<mvc:annotation-driven/>等同于上面两个bean
+
+============================================================
+
+四、Spring开发要点：
+
+1、接收请求参数
+Spring MVC Web请求提交数据到控制器有四种方法
+（1、通过参数名与表单传参名一致，如果不一致，可以通过@RequestParam注解，映射不一致的名称
+      优点：参数类型自动转换，但可能出现转换异常
+（2、使用自动机制封装成bean进行传参
+     定义一个与表单数据一致的Bean实体，属性名与表单name一致，就可以通过bean传参
+（3、通过HttpServletRequest获取表单数据
+        Spring注入优点：直接，缺点：需要自己处理数据类型转换
+（4、通过ModelAndView获取表单参数
+
+-------------------------------------------------------------
+2、向页面传值
+Controller组件处理后，需要向jsp传值，有四种方法
+（1、直接使用HttpServletRequest和session
+     session也是通过HttpServletRequest对象获取
+（2、使用ModelAndView对象
+     可以用ModelAndView对象返回参数，
+     例如：Map<String,Object> map =new HashMap<String,Object>();
+        new ModelAndView("login/login",map)
+（3、使用ModelMap参数对象
+     例如：
+      public String login(String username,ModelMap modelmap){  
+      modelmap.addAttribute("user",username)
+      return "login"}
+（4、使用@ModelAttribute注解
+       @ModelAttribute会利用HttpServletRequest把参数传递到页面
+      在Controller方法的参数部分或Bean属性方法上使用
+
+------------------------------------------------------------
+3、重定向
+重定向有两种方法
+（1、使用字符串 redirect:+视图前缀
+     Controller返回值是String时，可以使用字符串前缀重定向。
+     例如：return"redirect:login.do";
+（2、使用RedirectView对象
+     Controller返回值是ModelAndView时，使用RedirectView传递
+     RedirectView view=new ResidrectView("login.do");
+     return new ModelAndView(view);
+
+--------------------------------------------------------------
+
+4、解决中文乱码
+使用SpringMVC框架，表单提交时，会出现中文乱码现象
+Spring提供了一个CharacterEncodingFilter过滤器，用于解决乱码问题
+注意：1.表单必须是post请求提交2.页面编码与指定编码一致3.在Web.xml配置中配置CharacterEncodingFilter过滤器
+Web.xml中的CharacterEncodingFilter过滤器配置
+<filter>
+<filter-name>encodingFilter</filter-name>
+<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+<init-param>
+<param-name>encoding</param-name>
+<param-value>UTF-8</param-value>
+</init-param>
+</filter>
+<filter-mapping>
+<filter-name>encodingFilter</filter-name>
+<url-pattern>/*</url-pattern>
+</filter-mapping>
+
+--------------------------------------------------------------
+5、异常处理
+Spring MVC异常处理方式有三种：
+（1、使用Spring MVC提供的简单的异常处理器SimpleMappingExceptionResolver
+（2、实现HandlerExceptionResolver接口，自定义异常处理器
+（3、使用@ExceptionHandler注解实现异常处理
+除了SpringMVC提供的异常处理，手动处理或者自定义处理异常也是常用手段
+
+--------------------------------------------------------------
+6、拦截器
+
+拦截器适用于身份验证，用来拦截非法操作
+
+（1、拦截器必须实现HandlerInterceptor接口
+   该接口实现3个方法
+    1、boolean preHandle()
+       此方法在DispatcherServlet执行前被调用，返回true继续后续操作，false中断操作
+    2、postHandle()
+       此方法在DispatcherServlet执行后，视图解析前被调用，可以通过modelAndView改变视图
+    3、afterCompletion()
+       整个请求结束后被调用（只有preHandle方法返回true才会执行）
+
+（2、拦截器配置
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <mvc:exclude-mapping path="/login.do"/>
+            <mvc:exclude-mapping path="/toLogin.do"/>
+            <bean class="cn.eguid.interceptor.SomeInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
